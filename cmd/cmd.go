@@ -1,73 +1,55 @@
 package cmd
 
 import (
-	"bytes"
-	"fmt"
 	"image"
 	"image/color"
-	"image/draw"
-	"image/jpeg"
-	"image/png"
-	"io/ioutil"
+	"image/gif"
+	"io"
 	"math"
 	"math/rand"
 	"os"
-	"path"
-	"strings"
-	"time"
 )
 
 func WaterMark() {
-	fmt.Println("hello")
+	// fmt.Println(strings.Join(os.Args[1:], " "))
+	// input := bufio.NewScanner(os.Stdin)
+	// input.Scan()
+	// fmt.Fprintln(os.Stdout, input.Text())
+	lissajous(os.Stdout)
 }
 
-func main() {
-	//图片，网上随便找了一张
-	img_file, err := os.Open("bg.jpg")
-	if err != nil {
-		fmt.Println("打开图片出错")
-		fmt.Println(err)
-		os.Exit(-1)
+var palette = []color.Color{color.White, color.Black}
+
+const (
+	whiteIndex = 0 // first color in palette
+	blackIndex = 1 // next color in palette
+)
+
+func lissajous(out io.Writer) {
+	const (
+		cycles  = 5     // number of complete x oscillator revolutions
+		res     = 0.001 // angular resolution
+		size    = 100
+		nframes = 64
+		delay   = 8
+	)
+	// image canvas covers [-size..+size]
+	// number of animation frames
+	// delay between frames in 10ms units
+	freq := rand.Float64() * 3.0 // relative frequency of y oscillator
+	anim := gif.GIF{LoopCount: nframes}
+	phase := 0.0 // phase difference
+	for i := 0; i < nframes; i++ {
+		rect := image.Rect(0, 0, 2*size+1, 2*size+1)
+		img := image.NewPaletted(rect, palette)
+		for t := 0.0; t < cycles*2*math.Pi; t += res {
+			x := math.Sin(t)
+			y := math.Sin(t*freq + phase)
+			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), blackIndex)
+		}
+		phase += 0.1
+		anim.Delay = append(anim.Delay, delay)
+		anim.Image = append(anim.Image, img)
 	}
-	defer img_file.Close()
-	img, err := jpeg.Decode(img_file)
-	if err != nil {
-		fmt.Println("把图片解码为结构体时出错")
-		fmt.Println(img)
-		os.Exit(-1)
-	}
-
-	//水印,用的是我自己支付宝的二维码
-	wmb_file, err := os.Open("alipay.png")
-	if err != nil {
-		fmt.Println("打开水印图片出错")
-		fmt.Println(err)
-		os.Exit(-1)
-	}
-	defer wmb_file.Close()
-	wmb_img, err := png.Decode(wmb_file)
-	if err != nil {
-		fmt.Println("把水印图片解码为结构体时出错")
-		fmt.Println(err)
-		os.Exit(-1)
-	}
-
-	//把水印写在右下角，并向0坐标偏移10个像素
-	offset := image.Pt(img.Bounds().Dx()-wmb_img.Bounds().Dx()-10, img.Bounds().Dy()-wmb_img.Bounds().Dy()-10)
-	b := img.Bounds()
-	//根据b画布的大小新建一个新图像
-	m := image.NewRGBA(b)
-
-	//image.ZP代表Point结构体，目标的源点，即(0,0)
-	//draw.Src源图像透过遮罩后，替换掉目标图像
-	//draw.Over源图像透过遮罩后，覆盖在目标图像上（类似图层）
-	draw.Draw(m, b, img, image.ZP, draw.Src)
-	draw.Draw(m, wmb_img.Bounds().Add(offset), wmb_img, image.ZP, draw.Over)
-
-	//生成新图片new.jpg,并设置图片质量
-	imgw, err := os.Create("new.jpg")
-	jpeg.Encode(imgw, m, &jpeg.Options{100})
-	defer imgw.Close()
-
-	fmt.Println("添加水印图片结束请查看")
+	gif.EncodeAll(out, &anim) // NOTE: ignoring encoding errors
 }
