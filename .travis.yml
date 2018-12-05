@@ -18,7 +18,7 @@ notifications:
 
 before_install:
 - openssl aes-256-cbc -K $encrypted_859b60f93fdb_key -iv $encrypted_859b60f93fdb_iv
-  -in cn.enc -out ~/.ssh/id_rsas -d
+  -in cn.enc -out ~/.ssh/id_rsa -d
 - chmod 600 ~/.ssh/id_rsa
 env:
   global:
