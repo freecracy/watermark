@@ -8,21 +8,20 @@ addons:
   ssh_known_hosts:
   - "$HOST"
 after_success:
-- rsync -av -e "ssh -o StrictHostKeyChecking=no" ./output/linux/* home@$HOST:/home/home/test
+- rsync -av -e "ssh -o StrictHostKeyChecking=no" output/linux/* home@$HOST:/home/home/test
 notifications:
   email:
     recipients:
     - cn100800@163.com
     on_success: always
     on_failure: always
-
 before_install:
 - openssl aes-256-cbc -K $encrypted_859b60f93fdb_key -iv $encrypted_859b60f93fdb_iv
   -in cn.enc -out ~/.ssh/id_rsa -d
 - chmod 600 ~/.ssh/id_rsa
 env:
   global:
-    secure: NEaMw2ZUZxy27NVjSu8Ky7/8Y8vXsFt3fpZp8mjvab5jyiLflc00ceGofCxheOKdAYO4sxnI8ViZoMuNkJpRkJHJzk2+wB7xToOcqHCLCQbhcSIuKVVnsXb+MkmldjyvfymZHoLHUf/kOsIYn5Bm6Or1V3ou78gqZT4UABhOVU3baEuc8erP9iTGvuhF5yoDmwnQkYNRVV8M3yjwkP9tHjnj5rZd66dZoVsXmBIpafd6PSaI8HRg5X/YaCXwrHGjU1GnjMc5daFNROEaV//DCXJWzb7ZrcltajBlW305GxFM+uh1YiV/D0k9Vdb04timP/q6U7u5M6nanTIbvQeyhVc8nKTcjvGlBaYRJ8eBbCj+5CTJ2ldxQ7lKG68KTb/1fP2lrYiBTchR8IyYX5HxicHZHvucwm0nWtlLnUKAeozX2P14SDZOUwG6VeaLhGoQgl8prPKi9qKc/XrlnV88NkJhK/bw1rUo+l+p+HTc2jnkTNRSsJviQeLTQBLElb7zVVvkCcY9V3D141Y9FHHxnmS/HRloHTbLEXUFDSYn+yBPw/0Y2Oqbwgm0M4K1c+kHxntTry9JPVsRso6ssgWFMlV7YmY7QabYMHl8pEIdPKOI9qGLaaaINXV87/57jXwCinPpM6WBm2M8aFkpevZ1N8+EIl3+WozzTFHA2mtln38=
+    secure: esuN29TNE7ihUYJqBD4V2ZDMzuObLJhSZT4FuKbi3AD63CYdk484fe61S+Xevb+X92szSJgP8rI78UrSY3guLHoljO65t9Zf6uSyofwtcxnBpFNpHiAxwBVKZ7glI0FM5DxrlZdOSFdo9Q3zoG6PY/XPgRB1NkHUpJLvavPfCljacWGOIU7yKqQIi77B2kwnQuecJsAXshlM7hnFP2FJDIbttxL6aoy2IgHuoPZA2DJ5C+oT6MisTnDzOzJy2oxjUkJVAhBNsH6BnKsbDrEU7HOWypLbzhDs5wq1NCRdB5tTvjDUEcsALHHnIFBBXYpVya9CaGMFrdyYBwss5bPSnvGjivmQ/w7qKLttwXpMGBo6cAlfBB4JnrF/LPm8Vzv3L4J/2RN3v8dGEfjSLQF7KeVkHRlmuTpH85jz5D9JwG6axesDk21S/Ha6wL/EnFD95cJLKY5r1+1R9PbL/Bf4HOgzIAU23KRRk2SjX5RrZuVPdJsbsdNgLXiWDFvaCy83guzkyscEaQ3qb5PNpwkBjVaxJmzI6bt94NhkqjpmtFCV9H9rlSVi7Xc1+2AJJwTcjVV/+I/07i3SYbXajpGT2OVz4xYLQ5Zw9AE/ID/8GXCHtJCCHMoWcnnnVxgEydXpxFuZPfQhRwizfBODQuzuA7RzHpJjBCqWtpS2tQMCrtU=
 deploy:
   provider: releases
   file_glob: true
