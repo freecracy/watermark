@@ -8,7 +8,7 @@ addons:
   ssh_known_hosts:
   - "$HOST"
 after_success:
-- rsync -av -e "ssh -o StrictHostKeyChecking=no" output/linux/* home@$HOST:/home/home/test
+- rsync -av -e "ssh -o StrictHostKeyChecking=no" ./output/linux/* home@$HOST:/home/home/test
 notifications:
   email:
     recipients:
