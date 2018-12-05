@@ -1,4 +1,4 @@
-APP_NAME = wartermark
+APP_NAME = watermark
 BUILD_DIR = output
 RELEASE_DIR = release
 INSTALL_DIR = /usr/local/bin
@@ -21,7 +21,7 @@ build:
 	@echo "release success!"
 
 BUILD_DIR = output
-APP_NAME = wartermark
+APP_NAME = watermark
 BIN_PATH = /usr/local/bin
 GZ = gz
 XZ = xz
