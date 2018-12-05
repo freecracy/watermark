@@ -1,0 +1,35 @@
+language: go
+go:
+- '1.11'
+install: true
+before_script: export GO111MODULE=on
+script: make build
+addons:
+  ssh_known_hosts:
+  - "$HOST"
+after_success:
+- rsync -av -e "ssh -o StrictHostKeyChecking=no" output/linux/* home@$HOST:/home/home/test
+notifications:
+  email:
+    recipients:
+    - cn100800@163.com
+    on_success: always
+    on_failure: always
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_859b60f93fdb_key -iv $encrypted_859b60f93fdb_iv
+  -in cn.enc -out ~/.ssh/id_rsas -d
+- chmod 600 ~/.ssh/id_rsa
+env:
+  global:
+    secure: NEaMw2ZUZxy27NVjSu8Ky7/8Y8vXsFt3fpZp8mjvab5jyiLflc00ceGofCxheOKdAYO4sxnI8ViZoMuNkJpRkJHJzk2+wB7xToOcqHCLCQbhcSIuKVVnsXb+MkmldjyvfymZHoLHUf/kOsIYn5Bm6Or1V3ou78gqZT4UABhOVU3baEuc8erP9iTGvuhF5yoDmwnQkYNRVV8M3yjwkP9tHjnj5rZd66dZoVsXmBIpafd6PSaI8HRg5X/YaCXwrHGjU1GnjMc5daFNROEaV//DCXJWzb7ZrcltajBlW305GxFM+uh1YiV/D0k9Vdb04timP/q6U7u5M6nanTIbvQeyhVc8nKTcjvGlBaYRJ8eBbCj+5CTJ2ldxQ7lKG68KTb/1fP2lrYiBTchR8IyYX5HxicHZHvucwm0nWtlLnUKAeozX2P14SDZOUwG6VeaLhGoQgl8prPKi9qKc/XrlnV88NkJhK/bw1rUo+l+p+HTc2jnkTNRSsJviQeLTQBLElb7zVVvkCcY9V3D141Y9FHHxnmS/HRloHTbLEXUFDSYn+yBPw/0Y2Oqbwgm0M4K1c+kHxntTry9JPVsRso6ssgWFMlV7YmY7QabYMHl8pEIdPKOI9qGLaaaINXV87/57jXwCinPpM6WBm2M8aFkpevZ1N8+EIl3+WozzTFHA2mtln38=
+deploy:
+  provider: releases
+  file_glob: true
+  file:
+  - release/*
+  skip_cleanup: true
+  on:
+    tags: true
+  api_key:
+    secure: oUebuPK8POIZF6xFlil0WX2b3tbM5zbJVIPLfQWJhq3LT4mn70ArLvE5Pu8wQpyNkqa9ocs/W9RRbY7CI+ZiWC+fGFv6UEGlejb3pHEae/EhGcU5Y3fgtNXFi2CP3ekagsiQgkZAjAX+MdyN7ET6p7PHrDlQfRsn6o+UAM9OoEVpv2heAsWY03+rd/SNa2njorLo93jXrKgLybTnk4Bwexh3ocf+x4powuwogLZkoYgD0fXeJGEP/dV3ln1vbxv3hbMQSZdeoNu8Nx8gMZAF7oW2rP54yETdm9qDdltKsadbrgXiWjutYbPBKmV0hkoANDrCVozKTJFrEuvlaIcbF8fp++B3N1JdMJDu4A9mBkUEU/+CaOIsP0iGRvV9ZWwC7J1Z6cys5GTkzUI/kh1O5DPsH4CXh2p4fSnP73L6vWcxLbZCZNYoRV2UuafyWQfJNkKWXGS0G7fCF5VEax/LcRgVM25WVm/LRSA+29uXIIQ9O7P5OtubKiSzCa/AkMQ1kQDQsb1vL3dz+L88R9krx5BX4cht8JrbAY/rKgJFjVGrh6liU5JiFPLDR/QsSC4oFrbeYqvodGvaqV+BaFoJeBSDysooVhoU9pWKmqQmu6xeajWazPJqVBCWXYGRg8i0NSsTJvJYxiWBRtwWQctR81s1Jf8YY/YFNFPPIR/OjSc=

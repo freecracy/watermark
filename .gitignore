@@ -14,5 +14,7 @@
 !*.*
 !*/
 vendor/
-go.sum
 output/
+release/
+go.sum
+.DS_Store
