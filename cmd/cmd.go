@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"flag"
 	"image"
 	"image/color"
 	"image/draw"
-	"image/jpeg"
 	"image/png"
 	"io/ioutil"
 	"log"
@@ -22,20 +22,20 @@ const (
 
 func CreateTextImage() {
 
-	dx := 200
-	dy := 200
-	imgfile, _ := os.Create(filePath + "text.png")
+	text := flag.String("text", "hello", "水印文字")
+	flag.Parse()
 
+	dx := 100
+	dy := 50
+	imgfile, _ := os.Create(filePath + "text.png")
 	defer imgfile.Close()
 
 	img := image.NewNRGBA(image.Rect(0, 0, dx, dy))
-
 	for y := 0; y < dy; y++ {
 		for x := 0; x < dx; x++ {
 			img.Set(x, y, color.RGBA{0, 0, 0, 0})
 		}
 	}
-
 	fontBytes, err := ioutil.ReadFile(fontFile)
 	if err != nil {
 		log.Println(err)
@@ -52,12 +52,12 @@ func CreateTextImage() {
 	f.SetFontSize(26)
 	f.SetClip(img.Bounds())
 	f.SetDst(img)
-	f.SetSrc(image.NewUniform(color.RGBA{184, 184, 184, 100}))
+	f.SetSrc(image.NewUniform(color.RGBA{184, 184, 184, 70}))
 
 	//设置字体的位置
-	pt := freetype.Pt(40, 40+int(f.PointToFixed(26))>>8)
-
-	_, err = f.DrawString("hello", pt)
+	//pt := freetype.Pt(50, 15+int(f.PointToFixed(26))>>8)
+	pt := freetype.Pt(10, 25+12)
+	_, err = f.DrawString(*text, pt)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,24 +70,27 @@ func CreateTextImage() {
 
 func MergeImage() {
 
-	imgb, _ := os.Open(filePath + "image.png")
-	img, _ := png.Decode(imgb)
-	defer imgb.Close()
+	srcImage, _ := os.Open(filePath + "image.png")
+	srcPng, _ := png.Decode(srcImage)
+	defer srcImage.Close()
 
-	wmb, _ := os.Open(filePath + "text.png")
-	watermark, _ := png.Decode(wmb)
-	defer wmb.Close()
+	textImage, _ := os.Open(filePath + "text.png")
+	textPng, _ := png.Decode(textImage)
+	defer textImage.Close()
 
 	//把水印写到右下角，并向0坐标各偏移10个像素
-	offset := image.Pt(img.Bounds().Dx()-watermark.Bounds().Dx()-10, img.Bounds().Dy()-watermark.Bounds().Dy()-10)
-	b := img.Bounds()
+	b := srcPng.Bounds()
 	m := image.NewNRGBA(b)
 
-	draw.Draw(m, b, img, image.ZP, draw.Src)
-	draw.Draw(m, watermark.Bounds().Add(offset), watermark, image.ZP, draw.Over)
+	draw.Draw(m, b, srcPng, image.ZP, draw.Src)
+	for i := 10; i < 1000; i = i + 150 {
+		for j := 10; j < 500; j = j + 80 {
+			offset := image.Pt(srcPng.Bounds().Dx()-textPng.Bounds().Dx()-i, srcPng.Bounds().Dy()-textPng.Bounds().Dy()-j)
+			draw.Draw(m, textPng.Bounds().Add(offset), textPng, image.ZP, draw.Over)
+		}
+	}
 
-	imgw, _ := os.Create(filePath + "new.jpg")
-	jpeg.Encode(imgw, m, &jpeg.Options{100})
-
-	defer imgw.Close()
+	outImage, _ := os.Create(filePath + "new.png")
+	png.Encode(outImage, m)
+	defer outImage.Close()
 }
