@@ -5,5 +5,6 @@ import (
 )
 
 func main() {
-	cmd.WaterMark()
+	cmd.CreateTextImage()
+	cmd.MergeImage()
 }

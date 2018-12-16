@@ -1,61 +1,93 @@
 package cmd
 
-import "log"
+import (
+	"image"
+	"image/color"
+	"image/draw"
+	"image/jpeg"
+	"image/png"
+	"io/ioutil"
+	"log"
+	"os"
 
-func WaterMark() {
-	log.Println("wartermark")
+	"github.com/golang/freetype"
+)
+
+const (
+	filePath = "/Users/cn/Desktop/"
+	fontPath = "/Library/Fonts/"
+	font     = "Arial Italic.ttf"
+	fontFile = fontPath + font
+)
+
+func CreateTextImage() {
+
+	dx := 200
+	dy := 200
+	imgfile, _ := os.Create(filePath + "text.png")
+
+	defer imgfile.Close()
+
+	img := image.NewNRGBA(image.Rect(0, 0, dx, dy))
+
+	for y := 0; y < dy; y++ {
+		for x := 0; x < dx; x++ {
+			img.Set(x, y, color.RGBA{0, 0, 0, 0})
+		}
+	}
+
+	fontBytes, err := ioutil.ReadFile(fontFile)
+	if err != nil {
+		log.Println(err)
+	}
+
+	font, err := freetype.ParseFont(fontBytes)
+	if err != nil {
+		log.Println("load front fail", err)
+	}
+
+	f := freetype.NewContext()
+	f.SetDPI(72)
+	f.SetFont(font)
+	f.SetFontSize(26)
+	f.SetClip(img.Bounds())
+	f.SetDst(img)
+	f.SetSrc(image.NewUniform(color.RGBA{184, 184, 184, 100}))
+
+	//设置字体的位置
+	pt := freetype.Pt(40, 40+int(f.PointToFixed(26))>>8)
+
+	_, err = f.DrawString("hello", pt)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = png.Encode(imgfile, img)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-// import (
-// 	"image"
-// 	"image/color"
-// 	"image/gif"
-// 	"io"
-// 	"math"
-// 	"math/rand"
-// 	"os"
-// )
+func MergeImage() {
 
-// func WaterMark() {
-// 	// fmt.Println(strings.Join(os.Args[1:], " "))
-// 	// input := bufio.NewScanner(os.Stdin)
-// 	// input.Scan()
-// 	// fmt.Fprintln(os.Stdout, input.Text())
-// 	lissajous(os.Stdout)
-// }
+	imgb, _ := os.Open(filePath + "image.png")
+	img, _ := png.Decode(imgb)
+	defer imgb.Close()
 
-// var palette = []color.Color{color.White, color.Black}
+	wmb, _ := os.Open(filePath + "text.png")
+	watermark, _ := png.Decode(wmb)
+	defer wmb.Close()
 
-// const (
-// 	whiteIndex = 0 // first color in palette
-// 	blackIndex = 1 // next color in palette
-// )
+	//把水印写到右下角，并向0坐标各偏移10个像素
+	offset := image.Pt(img.Bounds().Dx()-watermark.Bounds().Dx()-10, img.Bounds().Dy()-watermark.Bounds().Dy()-10)
+	b := img.Bounds()
+	m := image.NewNRGBA(b)
 
-// func lissajous(out io.Writer) {
-// 	const (
-// 		cycles  = 5     // number of complete x oscillator revolutions
-// 		res     = 0.001 // angular resolution
-// 		size    = 100
-// 		nframes = 64
-// 		delay   = 8
-// 	)
-// 	// image canvas covers [-size..+size]
-// 	// number of animation frames
-// 	// delay between frames in 10ms units
-// 	freq := rand.Float64() * 3.0 // relative frequency of y oscillator
-// 	anim := gif.GIF{LoopCount: nframes}
-// 	phase := 0.0 // phase difference
-// 	for i := 0; i < nframes; i++ {
-// 		rect := image.Rect(0, 0, 2*size+1, 2*size+1)
-// 		img := image.NewPaletted(rect, palette)
-// 		for t := 0.0; t < cycles*2*math.Pi; t += res {
-// 			x := math.Sin(t)
-// 			y := math.Sin(t*freq + phase)
-// 			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), blackIndex)
-// 		}
-// 		phase += 0.1
-// 		anim.Delay = append(anim.Delay, delay)
-// 		anim.Image = append(anim.Image, img)
-// 	}
-// 	gif.EncodeAll(out, &anim) // NOTE: ignoring encoding errors
-// }
+	draw.Draw(m, b, img, image.ZP, draw.Src)
+	draw.Draw(m, watermark.Bounds().Add(offset), watermark, image.ZP, draw.Over)
+
+	imgw, _ := os.Create(filePath + "new.jpg")
+	jpeg.Encode(imgw, m, &jpeg.Options{100})
+
+	defer imgw.Close()
+}
