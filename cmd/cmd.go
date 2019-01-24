@@ -52,7 +52,7 @@ func CreateTextImage() {
 	f.SetFontSize(26)
 	f.SetClip(img.Bounds())
 	f.SetDst(img)
-	f.SetSrc(image.NewUniform(color.RGBA{184, 184, 184, 70}))
+	f.SetSrc(image.NewUniform(color.RGBA{184, 184, 184, 80}))
 
 	//设置字体的位置
 	//pt := freetype.Pt(50, 15+int(f.PointToFixed(26))>>8)
