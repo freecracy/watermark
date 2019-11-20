@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	filePath = "/Users/cn/Desktop/"
+	filePath = "/Desktop/"
 	fontPath = "/Library/Fonts/"
 	font     = "Arial Italic.ttf"
 	fontFile = fontPath + font
@@ -27,7 +27,8 @@ func CreateTextImage() {
 
 	dx := 100
 	dy := 50
-	imgfile, _ := os.Create(filePath + "text.png")
+	homeDir,_ := os.UserHomeDir()
+	imgfile, _ := os.Create(homeDir + filePath + "text.png")
 	defer imgfile.Close()
 
 	img := image.NewNRGBA(image.Rect(0, 0, dx, dy))
@@ -52,7 +53,7 @@ func CreateTextImage() {
 	f.SetFontSize(26)
 	f.SetClip(img.Bounds())
 	f.SetDst(img)
-	f.SetSrc(image.NewUniform(color.RGBA{184, 184, 184, 80}))
+	f.SetSrc(image.NewUniform(color.RGBA{184, 184, 184, 50}))
 
 	//设置字体的位置
 	//pt := freetype.Pt(50, 15+int(f.PointToFixed(26))>>8)
