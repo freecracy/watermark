@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"flag"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -16,7 +17,7 @@ import (
 const (
 	filePath = "/Desktop/"
 	fontPath = "/Library/Fonts/"
-	font     = "Arial Italic.ttf"
+	font     = "Arial Unicode.ttf"
 	fontFile = fontPath + font
 )
 
@@ -27,7 +28,8 @@ func CreateTextImage() {
 
 	dx := 100
 	dy := 50
-	homeDir,_ := os.UserHomeDir()
+	homeDir, _ := os.UserHomeDir()
+	fmt.Println(homeDir)
 	imgfile, _ := os.Create(homeDir + filePath + "text.png")
 	defer imgfile.Close()
 
@@ -53,7 +55,7 @@ func CreateTextImage() {
 	f.SetFontSize(26)
 	f.SetClip(img.Bounds())
 	f.SetDst(img)
-	f.SetSrc(image.NewUniform(color.RGBA{184, 184, 184, 50}))
+	f.SetSrc(image.NewUniform(color.RGBA{184, 184, 184, 80}))
 
 	//设置字体的位置
 	//pt := freetype.Pt(50, 15+int(f.PointToFixed(26))>>8)
@@ -71,8 +73,18 @@ func CreateTextImage() {
 
 func MergeImage() {
 
-	srcImage, _ := os.Open(filePath + "image.png")
-	srcPng, _ := png.Decode(srcImage)
+	filePath := "/Users/libin" + filePath
+
+	srcImage, err := os.Open(filePath + "image.png")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+	srcPng, err := png.Decode(srcImage)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
 	defer srcImage.Close()
 
 	textImage, _ := os.Open(filePath + "text.png")

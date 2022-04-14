@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"github.com/freecracy/watermark/cmd"
 )
 
@@ -18,5 +17,5 @@ func main() {
 	// }
 
 	cmd.CreateTextImage()
-	//cmd.MergeImage()
+	cmd.MergeImage()
 }
